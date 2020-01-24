@@ -1,39 +1,24 @@
 <?php
 
-
 namespace App\Controller;
 
 use App\Entity\Article;
-use App\Service\MarkdownHelper;
 use Doctrine\ORM\EntityManagerInterface;
-use Michelf\MarkdownInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class ArticleController extends AbstractController
+class ArticleAdminController extends AbstractController
 {
     /**
-     * @Route("/", name="app_homepage")
-     * @return Response
+     * @Route("/admin/article/new")
      */
-    public function homepage(){
-        return $this->render('article/homepage.html.twig');
-    }
-
-    /**
-     * @Route("/news/{slug}", name="article_show")
-     * @return Response
-     */
-    public function show($slug, MarkdownHelper $helper, EntityManagerInterface $em){
-        $comments = [
-            'I ate a normal rock once. It did NOT taste like bacon!',
-            'Woohoo! I\'m going on an all-asteroid diet!',
-            'I like bacon too! Buy some from my site! bakinsomebacon.com',
-        ];
-        $articleContent = <<<EOF
+    public function new(EntityManagerInterface $em)
+    {
+        $article =  new Article();
+        $article->setTitle('Why do Asteroids Taste Like Bacon')
+                ->setSlug('why-do-asteroids-taste-like-bacon'.rand(100,999))
+                ->setContent(<<<EOF
 Spicy **jalapeno bacon** ipsum dolor amet veniam shank in dolore. Ham hock nisi landjaeger cow,
 lorem proident [beef ribs](https://baconipsum.com/) aute enim veniam ut cillum pork chuck picanha. Dolore reprehenderit
 labore minim pork belly spare ribs cupim short loin in. Elit exercitation eiusmod dolore cow
@@ -50,27 +35,17 @@ mollit quis officia meatloaf tri-tip swine. Cow ut reprehenderit, buffalo incidi
 strip steak pork belly aliquip capicola officia. Labore deserunt esse chicken lorem shoulder tail consectetur
 cow est ribeye adipisicing. Pig hamburger pork belly enim. Do porchetta minim capicola irure pancetta chuck
 fugiat.
-EOF;
+EOF
+                );
+        $article->setPublishedAt(new \DateTime(sprintf('-%d days', rand(1, 100))));
 
-        $repository = $em->getRepository(Article::class);
+        $em->persist($article);
+        $em->flush();
 
-        $article = $repository->findOneBy(['slug' => $slug]);
-        if(!$article){
-            throw $this->createNotFoundException(sprintf('no article found with slug : %s', $slug));
-        }
-
-        $articleContent = $helper->parse($articleContent);
-        return $this->render('article/show.html.twig',[
-            'article' => $article,
-            'comments' => $comments,
-        ]);
-    }
-
-    /**
-     * @Route("/news/{slug}/heart", name="article_toggle_heart", methods={"POST"})
-     */
-    public function toggleArticleHeart($slug)
-    {
-        return new JsonResponse(['hearts' => rand(5,100)]);
+        return new Response(sprintf(
+            'Hiya! New Article id: #%d slug: %s',
+            $article->getId(),
+            $article->getSlug()
+        ));
     }
 }
