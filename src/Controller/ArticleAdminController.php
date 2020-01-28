@@ -38,6 +38,9 @@ fugiat.
 EOF
                 );
         $article->setPublishedAt(new \DateTime(sprintf('-%d days', rand(1, 100))));
+        $article->setAuthor('Anas Erra')
+                ->setHeartCount(rand(5,50))
+                ->setImageFilename('asteroid.jpeg');
 
         $em->persist($article);
         $em->flush();
