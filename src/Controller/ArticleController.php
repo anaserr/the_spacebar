@@ -32,19 +32,19 @@ class ArticleController extends AbstractController
      * @Route("/news/{slug}", name="article_show")
      * @return Response
      */
-    public function show($slug, MarkdownHelper $helper, EntityManagerInterface $em){
+    public function show(Article $article){
         $comments = [
             'I ate a normal rock once. It did NOT taste like bacon!',
             'Woohoo! I\'m going on an all-asteroid diet!',
             'I like bacon too! Buy some from my site! bakinsomebacon.com',
         ];
 
-        $repository = $em->getRepository(Article::class);
+        /*$repository = $em->getRepository(Article::class);
 
         $article = $repository->findOneBy(['slug' => $slug]);
         if(!$article){
             throw $this->createNotFoundException(sprintf('no article found with slug : %s', $slug));
-        }
+        }*/
 
 
         return $this->render('article/show.html.twig',[
